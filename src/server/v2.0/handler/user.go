@@ -142,7 +142,11 @@ func (u *usersAPI) ListUsers(ctx context.Context, params operation.ListUsersPara
 }
 
 func (u *usersAPI) GetCurrentUserPermissions(ctx context.Context, params operation.GetCurrentUserPermissionsParams) middleware.Responder {
-	if err := u.RequireAuthenticated(ctx); err != nil {
+	// Anonymous requests are answered too: they get what an anonymous visitor
+	// can do, such as reading public projects, so the portal can show public
+	// content without signing in. The security context decides each permission.
+	sctx, err := u.GetSecurityContext(ctx)
+	if err != nil {
 		return u.SendError(ctx, err)
 	}
 	scope := ""
@@ -150,7 +154,6 @@ func (u *usersAPI) GetCurrentUserPermissions(ctx context.Context, params operati
 		scope = *params.Scope
 	}
 	var policies []*types.Policy
-	sctx, _ := security.FromContext(ctx)
 	if ns, ok := types.NamespaceFromResource(rbac.Resource(scope)); ok {
 		for _, policy := range ns.GetPolicies() {
 			if sctx.Can(ctx, policy.Action, policy.Resource) {

@@ -6121,7 +6121,10 @@ paths:
   /users/current/permissions:
     get:
       summary: Get current user permissions.
-      description: Get the RBAC permission list for the currently authenticated user, optionally filtered by scope.
+      description: >-
+        Get the RBAC permission list for the current user, optionally filtered by scope.
+        A request that isn't signed in gets the permissions of an anonymous user, such as
+        read access to public projects.
       tags:
         - user
       operationId: getCurrentUserPermissions

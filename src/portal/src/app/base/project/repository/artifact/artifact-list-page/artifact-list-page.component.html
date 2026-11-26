@@ -40,7 +40,7 @@
     <section class="detail-section">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <ul id="configTabs" class="nav" role="tablist">
-                @if (!artifactDigest) {
+                @if (!artifactDigest && hasRepositoryReadPermission) {
                 <li role="presentation" class="nav-item">
                     <button
                         id="repo-info"

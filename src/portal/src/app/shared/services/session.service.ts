@@ -40,6 +40,9 @@ const langMap = {
     zh: 'zh-CN',
     en: 'en-US',
 };
+// Session storage key that is set while the visitor browses as a guest, so a
+// reload keeps the guest in the portal until the browser tab is closed.
+export const GUEST_STORAGE_KEY = 'harbor-guest';
 
 /**
  * Define related methods to handle account and session corresponding things
@@ -53,11 +56,18 @@ const langMap = {
 export class SessionService {
     currentUser: SessionUser = null;
     projectMembers: ProjectMemberEntity[];
+    private guest: boolean = false;
     constructor(
         private http: HttpClient,
         public sessionViewmodel: SessionViewmodelFactory,
         private jobServiceDashboardHealthCheckService: JobServiceDashboardHealthCheckService
-    ) {}
+    ) {
+        try {
+            this.guest = sessionStorage.getItem(GUEST_STORAGE_KEY) === 'true';
+        } catch (e) {
+            // Storage can be blocked by the browser.
+        }
+    }
 
     // Handle the related exceptions
     handleError(error: any): Observable<any> {
@@ -100,6 +110,8 @@ export class SessionService {
                 this.currentUser = this.sessionViewmodel.getCurrentUser(
                     response
                 ) as SessionUser;
+                // Signed in, so no longer a guest.
+                this.setGuest(false);
                 this.jobServiceDashboardHealthCheckService.checkHealth();
             }),
             catchError(error => this.handleError(error))
@@ -110,6 +122,28 @@ export class SessionService {
      */
     getCurrentUser(): SessionUser {
         return this.currentUser;
+    }
+
+    /**
+     * Whether the visitor chose to browse without signing in, seeing what an
+     * anonymous user may see, such as public projects. A signed-in user is
+     * never a guest.
+     */
+    isGuest(): boolean {
+        return !this.currentUser && this.guest;
+    }
+
+    setGuest(guest: boolean): void {
+        this.guest = guest;
+        try {
+            if (guest) {
+                sessionStorage.setItem(GUEST_STORAGE_KEY, 'true');
+            } else {
+                sessionStorage.removeItem(GUEST_STORAGE_KEY);
+            }
+        } catch (e) {
+            // Storage can be blocked by the browser; then a reload ends it.
+        }
     }
 
     /**

@@ -10,7 +10,8 @@
         "INVALID_MSG": "用户名或者密码不正确。",
         "CORE_SERVICE_NOT_AVAILABLE": "核心服务不可用。",
         "OR": "或",
-        "VIA_LOCAL_DB": "通过本地数据库登录"
+        "VIA_LOCAL_DB": "通过本地数据库登录",
+        "CONTINUE_AS_GUEST": "以访客身份继续"
     },
     "SIGN_UP": {
         "TITLE": "注册"

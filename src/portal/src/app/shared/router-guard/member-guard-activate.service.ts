@@ -77,10 +77,13 @@ export class MemberGuard {
                 return true;
             }),
             catchError(err => {
-                // User session timed out, then redirect to sign-in page
+                // User session timed out, then redirect to sign-in page.
+                // A guest can't see the project without signing in, so goes
+                // to the projects it can see instead.
                 if (
                     err.status === HttpStatusCode.Unauthorized &&
-                    route.queryParams[UN_LOGGED_PARAM] !== YES
+                    route.queryParams[UN_LOGGED_PARAM] !== YES &&
+                    !this.sessionService.isGuest()
                 ) {
                     this.sessionService.clear(); // because of SignInGuard, must clear user session before navigating to sign-in page
                     this.router.navigate([CommonRoutes.EMBEDDED_SIGN_IN], {

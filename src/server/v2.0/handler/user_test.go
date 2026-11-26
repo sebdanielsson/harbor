@@ -10,6 +10,8 @@ import (
 
 	"github.com/goharbor/harbor/src/common"
 	commonmodels "github.com/goharbor/harbor/src/common/models"
+	"github.com/goharbor/harbor/src/common/rbac"
+	"github.com/goharbor/harbor/src/pkg/permission/types"
 	"github.com/goharbor/harbor/src/server/v2.0/models"
 	"github.com/goharbor/harbor/src/server/v2.0/restapi"
 	usertesting "github.com/goharbor/harbor/src/testing/controller/user"
@@ -137,6 +139,50 @@ func (uts *UserTestSuite) TestGetRandomSecret() {
 
 func TestUserTestSuite(t *testing.T) {
 	suite.Run(t, &UserTestSuite{})
+}
+
+// AnonymousPermissionsTestSuite checks GET /users/current/permissions for a
+// request that hasn't signed in.
+type AnonymousPermissionsTestSuite struct {
+	htesting.Suite
+}
+
+func (s *AnonymousPermissionsTestSuite) SetupSuite() {
+	s.Config = &restapi.Config{
+		UserAPI: &usersAPI{},
+	}
+	s.Suite.SetupSuite()
+	s.Security.On("IsAuthenticated").Return(false)
+	// What an anonymous visitor can do in a public project (1) but not in a
+	// private one (2).
+	s.Security.On("Can", mock.Anything, mock.Anything, mock.Anything).Return(
+		func(_ context.Context, action types.Action, resource types.Resource) bool {
+			return resource.String() == "/project/1/repository" &&
+				(action == rbac.ActionList || action == rbac.ActionPull)
+		})
+}
+
+func (s *AnonymousPermissionsTestSuite) TestPublicProject() {
+	var permissions []*models.Permission
+	res, err := s.GetJSON("/users/current/permissions?scope=/project/1&relative=true", &permissions)
+	s.NoError(err)
+	s.Equal(200, res.StatusCode)
+	s.ElementsMatch([]*models.Permission{
+		{Resource: "repository", Action: "list"},
+		{Resource: "repository", Action: "pull"},
+	}, permissions)
+}
+
+func (s *AnonymousPermissionsTestSuite) TestPrivateProject() {
+	var permissions []*models.Permission
+	res, err := s.GetJSON("/users/current/permissions?scope=/project/2&relative=true", &permissions)
+	s.NoError(err)
+	s.Equal(200, res.StatusCode)
+	s.Empty(permissions)
+}
+
+func TestAnonymousPermissionsTestSuite(t *testing.T) {
+	suite.Run(t, &AnonymousPermissionsTestSuite{})
 }
 
 func Test_validateUserProfile(t *testing.T) {

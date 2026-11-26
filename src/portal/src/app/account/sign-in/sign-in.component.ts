@@ -38,6 +38,7 @@ import {
 import { SignInCredential } from './sign-in-credential';
 import { UserPermissionService } from '../../shared/services';
 import { finalize } from 'rxjs/operators';
+import { ProjectService } from '../../../../ng-swagger-gen/services/project.service';
 
 // Define status flags for signing in states
 export const signInStatusNormal = 0;
@@ -79,6 +80,8 @@ export class SignInComponent implements AfterViewChecked, OnInit {
     isCoreServiceAvailable: boolean = true;
     steps: number = 1;
     hasLoadedAppConfig: boolean = false;
+    // Whether there are public projects, which a guest can see.
+    hasPublicProjects: boolean = false;
     constructor(
         private router: Router,
         private session: SessionService,
@@ -86,7 +89,8 @@ export class SignInComponent implements AfterViewChecked, OnInit {
         private appConfigService: AppConfigService,
         private cookie: CookieService,
         private skinableConfig: SkinableConfig,
-        private userPermissionService: UserPermissionService
+        private userPermissionService: UserPermissionService,
+        private projectService: ProjectService
     ) {}
 
     ngOnInit(): void {
@@ -114,6 +118,44 @@ export class SignInComponent implements AfterViewChecked, OnInit {
             this.signInCredential.principal = remUsername;
             this.rememberMe = true;
             this.rememberedName = remUsername;
+        }
+
+        // Offer to continue as a guest only when there is something to see.
+        this.projectService
+            .listProjectsResponse({
+                public: true,
+                page: 1,
+                pageSize: 1,
+                withDetail: false,
+            })
+            .subscribe({
+                next: res => {
+                    this.hasPublicProjects =
+                        +res.headers.get('X-Total-Count') > 0;
+                },
+                error: () => {
+                    this.hasPublicProjects = false;
+                },
+            });
+    }
+
+    // Browse what an anonymous user may see, without signing in
+    continueAsGuest(): void {
+        // Like signing in, start without anything cached for someone else
+        this.userPermissionService.clearPermissionCache();
+        this.session.setGuest(true);
+        this.navigateToRedirectUrl();
+    }
+
+    // Go to the page that asked for sign-in, or else the default page
+    private navigateToRedirectUrl(): void {
+        if (
+            !this.redirectUrl ||
+            this.redirectUrl.startsWith(CommonRoutes.EMBEDDED_SIGN_IN)
+        ) {
+            this.router.navigateByUrl(CommonRoutes.HARBOR_DEFAULT);
+        } else {
+            this.router.navigateByUrl(this.redirectUrl);
         }
     }
 
@@ -263,15 +305,7 @@ export class SignInComponent implements AfterViewChecked, OnInit {
                 this.remeberMe();
 
                 // Redirect to the right router-guard
-                if (
-                    !this.redirectUrl ||
-                    this.redirectUrl.startsWith(CommonRoutes.EMBEDDED_SIGN_IN)
-                ) {
-                    // Routing to the default location
-                    this.router.navigateByUrl(CommonRoutes.HARBOR_DEFAULT);
-                } else {
-                    this.router.navigateByUrl(this.redirectUrl);
-                }
+                this.navigateToRedirectUrl();
                 this.isCoreServiceAvailable = true;
 
                 // after login successfully: Make sure the updated configuration can be loaded

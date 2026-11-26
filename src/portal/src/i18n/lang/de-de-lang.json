@@ -10,7 +10,8 @@
         "INVALID_MSG": "Falscher Nutzername oder Passwort.",
         "OR": "ODER",
         "VIA_LOCAL_DB": "LOGIN MIT LOKALER DB",
-        "CORE_SERVICE_NOT_AVAILABLE": "Core Service ist nicht verfügbar"
+        "CORE_SERVICE_NOT_AVAILABLE": "Core Service ist nicht verfügbar",
+        "CONTINUE_AS_GUEST": "ALS GAST FORTFAHREN"
     },
     "SIGN_UP": {
         "TITLE": "Registrieren"

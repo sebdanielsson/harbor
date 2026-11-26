@@ -26,7 +26,7 @@ describe('ProjectComponent', () => {
     let component: ProjectsComponent;
     let fixture: ComponentFixture<ProjectsComponent>;
     const mockSessionService = {
-        getCurrentUser: () => {
+        getCurrentUser: (): any => {
             return of({
                 user_id: 1,
             });
@@ -265,5 +265,19 @@ describe('ProjectComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should show the statistics to a signed-in user', () => {
+        expect(
+            fixture.nativeElement.querySelector('statistics-panel')
+        ).toBeTruthy();
+    });
+
+    it('should not show the statistics to a visitor who is not signed in', () => {
+        spyOn(mockSessionService, 'getCurrentUser').and.returnValue(null);
+        fixture.detectChanges();
+        expect(
+            fixture.nativeElement.querySelector('statistics-panel')
+        ).toBeFalsy();
     });
 });

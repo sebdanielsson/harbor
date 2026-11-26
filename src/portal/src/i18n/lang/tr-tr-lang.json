@@ -10,7 +10,8 @@
         "INVALID_MSG": "Geçersiz kullanıcı adı veya şifre.",
         "CORE_SERVICE_NOT_AVAILABLE": "Core service is not available.",
         "OR": "OR",
-        "VIA_LOCAL_DB": "LOGIN VIA LOCAL DB"
+        "VIA_LOCAL_DB": "LOGIN VIA LOCAL DB",
+        "CONTINUE_AS_GUEST": "MİSAFİR OLARAK DEVAM ET"
     },
     "SIGN_UP": {
         "TITLE": "Kayıt ol"

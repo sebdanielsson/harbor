@@ -17,10 +17,17 @@ import { of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { SharedTestingModule } from '../../../../../shared/shared.module';
 import { ArtifactListPageService } from './artifact-list-page.service';
+import { UserPermissionService } from '../../../../../shared/services';
 
 describe('ArtifactListPageComponent', () => {
     let component: ArtifactListPageComponent;
     let fixture: ComponentFixture<ArtifactListPageComponent>;
+    // Whether the user may read the repository
+    let canReadRepository: boolean;
+    const mockUserPermissionService = {
+        getPermission: () => of(canReadRepository),
+        hasProjectPermissions: () => of([false, false, false, false, false]),
+    };
     const mockActivatedRoute = {
         RouterparamMap: of({ get: key => 'value' }),
         snapshot: {
@@ -60,11 +67,16 @@ describe('ArtifactListPageComponent', () => {
             providers: [
                 ArtifactListPageService,
                 { provide: ActivatedRoute, useValue: mockActivatedRoute },
+                {
+                    provide: UserPermissionService,
+                    useValue: mockUserPermissionService,
+                },
             ],
         }).compileComponents();
     });
 
     beforeEach(() => {
+        canReadRepository = true;
         fixture = TestBed.createComponent(ArtifactListPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -75,8 +87,20 @@ describe('ArtifactListPageComponent', () => {
     });
 
     it('should have two tabs', async () => {
+        component.init();
+        fixture.detectChanges();
         await fixture.whenStable();
         const tabs = fixture.nativeElement.querySelectorAll('.nav-item');
         expect(tabs.length).toEqual(2);
+    });
+
+    it('should only show the artifacts to a user who may not read the repository', async () => {
+        canReadRepository = false;
+        component.init();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const tabs = fixture.nativeElement.querySelectorAll('.nav-item');
+        expect(tabs.length).toEqual(1);
+        expect(fixture.nativeElement.querySelector('#repo-info')).toBeFalsy();
     });
 });

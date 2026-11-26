@@ -185,7 +185,22 @@
                         (click)="signUp()"
                         >{{ 'BUTTON.SIGN_UP_LINK' | translate }}</a
                     >
-                    } }
+                    } } @if (hasPublicProjects) {
+                    <div class="divider-container mt-1 mb-1">
+                        <hr class="divider" size="1" noshade />
+                        <h4 class="m-0">
+                            <span>{{ 'SIGN_IN.OR' | translate }}</span>
+                        </h4>
+                        <hr class="divider" size="1" noshade />
+                    </div>
+                    <button
+                        type="button"
+                        id="continue_as_guest"
+                        class="btn btn-outline btn-block mt-0"
+                        (click)="continueAsGuest()">
+                        {{ 'SIGN_IN.CONTINUE_AS_GUEST' | translate }}
+                    </button>
+                    }
                     <div
                         class="more-info"
                         [ngClass]="{

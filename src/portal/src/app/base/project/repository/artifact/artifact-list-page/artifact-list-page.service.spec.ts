@@ -20,6 +20,7 @@ import {
 } from 'src/app/shared/services';
 import { of } from 'rxjs';
 import { ClrLoadingState } from '@clr/angular';
+import { SessionService } from 'src/app/shared/services/session.service';
 
 describe('ArtifactListPageService', () => {
     const FakedScanningResultService = {
@@ -50,6 +51,9 @@ describe('ArtifactListPageService', () => {
     const FakedUserPermissionService = {
         hasProjectPermissions: () => of([true, true, true, true, true]),
     };
+    const FakedSessionService = {
+        getCurrentUser: (): any => ({ user_id: 1 }),
+    };
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [SharedTestingModule],
@@ -63,6 +67,7 @@ describe('ArtifactListPageService', () => {
                     provide: UserPermissionService,
                     useValue: FakedUserPermissionService,
                 },
+                { provide: SessionService, useValue: FakedSessionService },
             ],
         });
     });
@@ -97,6 +102,14 @@ describe('ArtifactListPageService', () => {
             );
             service.init(3);
             expect(service.hasSbomPermission()).toBeFalsy();
+        }
+    ));
+    it('Test ArtifactListPageService copy needs a signed-in user', inject(
+        [ArtifactListPageService],
+        (service: ArtifactListPageService) => {
+            spyOn(FakedSessionService, 'getCurrentUser').and.returnValue(null);
+            service.init(3);
+            expect(service.hasRetagImagePermission()).toBeFalsy();
         }
     ));
     it('Test ArtifactListPageService updateStates', inject(

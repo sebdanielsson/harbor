@@ -169,6 +169,10 @@ export class HarborShellComponent implements OnInit, OnDestroy {
         let account = this.session.getCurrentUser();
         return account != null;
     }
+
+    public get isGuest(): boolean {
+        return this.session.isGuest();
+    }
     public get hasAdminRole(): boolean {
         return (
             this.session.getCurrentUser() &&

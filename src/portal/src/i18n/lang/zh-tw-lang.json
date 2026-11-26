@@ -10,7 +10,8 @@
         "INVALID_MSG": "使用者名稱或密碼不正確。",
         "CORE_SERVICE_NOT_AVAILABLE": "核心服務無法使用。",
         "OR": "或",
-        "VIA_LOCAL_DB": "透過本機資料庫登入"
+        "VIA_LOCAL_DB": "透過本機資料庫登入",
+        "CONTINUE_AS_GUEST": "以訪客身分繼續"
     },
     "SIGN_UP": {
         "TITLE": "註冊"

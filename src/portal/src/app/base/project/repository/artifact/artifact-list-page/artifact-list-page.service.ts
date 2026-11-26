@@ -20,6 +20,7 @@ import {
 } from '../../../../../shared/services';
 import { ErrorHandler } from '../../../../../shared/units/error-handler';
 import { Scanner } from '../../../../left-side-nav/interrogation-services/scanner/scanner';
+import { SessionService } from '../../../../../shared/services/session.service';
 
 @Injectable()
 export class ArtifactListPageService {
@@ -38,7 +39,8 @@ export class ArtifactListPageService {
     constructor(
         private scanningService: ScanningResultService,
         private userPermissionService: UserPermissionService,
-        private errorHandlerService: ErrorHandler
+        private errorHandlerService: ErrorHandler,
+        private session: SessionService
     ) {}
 
     getProjectScanner(): Scanner {
@@ -190,7 +192,10 @@ export class ArtifactListPageService {
             .subscribe(
                 (results: Array<boolean>) => {
                     this._hasAddLabelImagePermission = results[0];
-                    this._hasRetagImagePermission = results[1];
+                    // Copying also pushes to a project, which needs a
+                    // signed-in user, even when pulling from here doesn't.
+                    this._hasRetagImagePermission =
+                        results[1] && this.session.getCurrentUser() != null;
                     this._hasDeleteImagePermission = results[2];
                     this._hasScanImagePermission = results[3];
                     this._hasSbomPermission = results?.[4] ?? false;

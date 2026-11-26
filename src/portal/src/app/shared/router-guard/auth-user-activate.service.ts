@@ -58,6 +58,19 @@ export class AuthCheckGuard {
                         return observer.next(true);
                     },
                     error => {
+                        // A guest sees what the API allows without signing in,
+                        // which is the projects; other pages lead to them.
+                        if (this.authService.isGuest()) {
+                            if (
+                                state.url.startsWith(
+                                    CommonRoutes.HARBOR_DEFAULT
+                                )
+                            ) {
+                                return observer.next(true);
+                            }
+                            this.router.navigate([CommonRoutes.HARBOR_DEFAULT]);
+                            return observer.next(false);
+                        }
                         // Session retrieving failed then redirect to sign-in
                         // no matter what status code is.
                         // no need to check auth for `sign in` page

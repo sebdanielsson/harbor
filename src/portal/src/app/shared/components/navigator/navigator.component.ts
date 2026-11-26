@@ -46,6 +46,8 @@ import { map } from 'rxjs/operators';
 import { forkJoin, Observable } from 'rxjs';
 import { ClrCommonStringsService } from '@clr/angular';
 import { signInStatusError } from '../../../account/sign-in/sign-in.component';
+import { UN_LOGGED_PARAM } from '../../../account/sign-in/sign-in.service';
+import { delUrlParam } from '../../units/utils';
 
 @Component({
     selector: 'navigator',
@@ -114,6 +116,14 @@ export class NavigatorComponent implements OnInit {
 
     public get isSessionValid(): boolean {
         return this.session.getCurrentUser() != null;
+    }
+
+    // A guest can log in from any page but the sign-in page itself
+    public get showGuestLogIn(): boolean {
+        return (
+            this.session.isGuest() &&
+            !this.router.url?.startsWith(CommonRoutes.EMBEDDED_SIGN_IN)
+        );
     }
 
     public get accountName(): string {
@@ -205,6 +215,16 @@ export class NavigatorComponent implements OnInit {
             modalName: modalEvents.ABOUT,
             modalFlag: true,
         });
+    }
+
+    // Sign in from the guest view, then come back to the current page
+    logIn(): void {
+        this.router.navigate([CommonRoutes.EMBEDDED_SIGN_IN], {
+            queryParams: {
+                redirect_url: delUrlParam(this.router.url, UN_LOGGED_PARAM),
+            },
+        });
+        this.searchTrigger.closeSearch(true);
     }
 
     // Log out system

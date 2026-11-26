@@ -10,7 +10,8 @@
         "INVALID_MSG": "Nom d'utilisateur ou mot de passe invalide.",
         "CORE_SERVICE_NOT_AVAILABLE": "Service Core indisponible.",
         "OR": "OU",
-        "VIA_LOCAL_DB": "LOGIN VIA BASE LOCALE"
+        "VIA_LOCAL_DB": "LOGIN VIA BASE LOCALE",
+        "CONTINUE_AS_GUEST": "CONTINUER EN TANT QU'INVITÉ"
     },
     "SIGN_UP": {
         "TITLE": "S'inscrire"

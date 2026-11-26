@@ -157,6 +157,11 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         let account = this.session.getCurrentUser();
         return account != null && account.has_admin_role;
     }
+
+    // The statistics need a signed-in user, a guest doesn't get them
+    public get isSignedIn(): boolean {
+        return this.session.getCurrentUser() != null;
+    }
     openModal(): void {
         this.creationProject.newProject();
     }

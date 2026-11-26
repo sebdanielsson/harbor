@@ -16,7 +16,7 @@
             <search-result></search-result>
             <router-outlet></router-outlet>
         </div>
-        @if (isUserExisting) {
+        @if (isUserExisting || isGuest) {
         <clr-vertical-nav [clrVerticalNavCollapsible]="true">
             <div>
                 <a
@@ -28,6 +28,7 @@
                         clrVerticalNavIcon></clr-icon>
                     {{ 'SIDE_NAV.PROJECTS' | translate }}
                 </a>
+                @if (isUserExisting) {
                 <a
                     clrVerticalNavLink
                     routerLinkActive="active"
@@ -35,7 +36,7 @@
                     <clr-icon shape="list" clrVerticalNavIcon></clr-icon>
                     {{ 'SIDE_NAV.LOGS' | translate }}
                 </a>
-                @if (isSystemAdmin) {
+                } @if (isSystemAdmin) {
                 <clr-vertical-nav-group routerLinkActive="active">
                     <clr-icon
                         shape="administrator"

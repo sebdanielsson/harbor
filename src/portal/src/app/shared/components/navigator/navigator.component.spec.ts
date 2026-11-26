@@ -22,6 +22,7 @@ import { MessageHandlerService } from '../../services/message-handler.service';
 import { SearchTriggerService } from '../global-search/search-trigger.service';
 import { SkinableConfig } from '../../../services/skinable-config.service';
 import { SharedTestingModule } from '../../shared.module';
+import { Router } from '@angular/router';
 
 describe('NavigatorComponent', () => {
     let component: TestComponentWrapperComponent;
@@ -32,6 +33,9 @@ describe('NavigatorComponent', () => {
                 username: 'abc',
                 has_admin_role: true,
             };
+        },
+        isGuest: function () {
+            return false;
         },
     };
     let fakePlatformLocation = null;
@@ -61,6 +65,7 @@ describe('NavigatorComponent', () => {
         triggerSearch() {
             return undefined;
         },
+        closeSearch(close: boolean) {},
     };
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -93,6 +98,35 @@ describe('NavigatorComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should not offer a guest log-in to a signed-in user', () => {
+        expect(fixture.nativeElement.querySelector('#guestLogIn')).toBeFalsy();
+    });
+
+    it('should let a guest log in and come back to the same page', () => {
+        spyOn(fakeSessionService, 'getCurrentUser').and.returnValue(null);
+        spyOn(fakeSessionService, 'isGuest').and.returnValue(true);
+        const router = TestBed.inject(Router);
+        spyOnProperty(router, 'url').and.returnValue(
+            '/harbor/projects/1/repositories?publicAndNotLogged=yes'
+        );
+        fixture.detectChanges();
+        const navigate = spyOn(router, 'navigate').and.resolveTo(true);
+        fixture.nativeElement.querySelector('#guestLogIn').click();
+        expect(navigate).toHaveBeenCalledWith(['/account/sign-in'], {
+            queryParams: { redirect_url: '/harbor/projects/1/repositories' },
+        });
+    });
+
+    it('should not offer a guest log-in on the sign-in page', () => {
+        spyOn(fakeSessionService, 'getCurrentUser').and.returnValue(null);
+        spyOn(fakeSessionService, 'isGuest').and.returnValue(true);
+        spyOnProperty(TestBed.inject(Router), 'url').and.returnValue(
+            '/account/sign-in?redirect_url=%2Fharbor%2Fprojects'
+        );
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('#guestLogIn')).toBeFalsy();
     });
 });
 

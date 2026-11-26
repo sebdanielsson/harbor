@@ -120,6 +120,15 @@
             (click)="openAboutDialog()"
             >{{ 'ACCOUNT_SETTINGS.ABOUT' | translate }}</a
         >
+        } @if (showGuestLogIn) {
+        <div class="nav-divider"></div>
+        <a
+            href="javascript:void(0)"
+            id="guestLogIn"
+            class="nav-link nav-text"
+            (click)="logIn()"
+            >{{ 'BUTTON.LOG_IN' | translate }}</a
+        >
         }
     </div>
 </clr-header>

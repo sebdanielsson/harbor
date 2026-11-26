@@ -119,8 +119,11 @@ export class ProjectDetailComponent
             linkName: 'scanner',
             tabLinkInOverflow: false,
             showTabName: 'SCANNER.SCANNER',
+            // The project scanner API needs a signed-in user.
             permissions: () =>
-                this.hasScannerReadPermission && !this.isLimitedGuestOrGuest(),
+                this.isSessionValid &&
+                this.hasScannerReadPermission &&
+                !this.isLimitedGuestOrGuest(),
         },
         {
             linkName: 'p2p-provider',
@@ -378,6 +381,10 @@ export class ProjectDetailComponent
 
     public get isSessionValid(): boolean {
         return this.sessionService.getCurrentUser() != null;
+    }
+
+    public get isGuest(): boolean {
+        return this.sessionService.isGuest();
     }
 
     backToProject(): void {

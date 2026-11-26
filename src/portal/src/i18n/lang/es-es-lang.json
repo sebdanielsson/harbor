@@ -10,7 +10,8 @@
         "INVALID_MSG": "Nombre o contraseña no válidos.",
         "CORE_SERVICE_NOT_AVAILABLE": "Core service no esta disponible.",
         "OR": "OR",
-        "VIA_LOCAL_DB": "LOGIN VIA LOCAL DB"
+        "VIA_LOCAL_DB": "LOGIN VIA LOCAL DB",
+        "CONTINUE_AS_GUEST": "CONTINUAR COMO INVITADO"
     },
     "SIGN_UP": {
         "TITLE": "Registrarse"

@@ -41,11 +41,12 @@ describe('ProjectDetailComponent', () => {
     let component: ProjectDetailComponent;
     let fixture: ComponentFixture<ProjectDetailComponent>;
     const mockSessionService = {
-        getCurrentUser: () => {
+        getCurrentUser: (): any => {
             return of({
                 user_id: 1,
             });
         },
+        isGuest: () => false,
     };
     const mockAppConfigService = {
         getConfig: () => {
@@ -122,5 +123,38 @@ describe('ProjectDetailComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should lead a signed-in user back to the projects', () => {
+        expect(
+            fixture.nativeElement.querySelector('#back-to-projects')
+        ).toBeTruthy();
+        expect(
+            fixture.nativeElement.querySelector('#back-to-sign-in')
+        ).toBeFalsy();
+    });
+
+    it('should lead a guest back to the projects', () => {
+        spyOn(mockSessionService, 'getCurrentUser').and.returnValue(null);
+        spyOn(mockSessionService, 'isGuest').and.returnValue(true);
+        fixture = TestBed.createComponent(ProjectDetailComponent);
+        fixture.detectChanges();
+        expect(
+            fixture.nativeElement.querySelector('#back-to-projects')
+        ).toBeTruthy();
+        expect(
+            fixture.nativeElement.querySelector('#back-to-sign-in')
+        ).toBeFalsy();
+    });
+
+    it('should not show the scanner tab to a guest', () => {
+        component.hasScannerReadPermission = true;
+        const scannerTab = component.tabLinkNavList.find(
+            tab => tab.linkName === 'scanner'
+        );
+        expect(scannerTab.permissions()).toBeTrue();
+        spyOn(mockSessionService, 'getCurrentUser').and.returnValue(null);
+        spyOn(mockSessionService, 'isGuest').and.returnValue(true);
+        expect(scannerTab.permissions()).toBeFalse();
     });
 });

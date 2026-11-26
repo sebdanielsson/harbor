@@ -10,7 +10,8 @@
         "INVALID_MSG": "유효하지 않은 사용자 이름 또는 비밀번호입니다.",
         "CORE_SERVICE_NOT_AVAILABLE": "핵심 서비스를 이용할 수 없습니다.",
         "OR": "또는",
-        "VIA_LOCAL_DB": "로컬 DB를 통해 로그인"
+        "VIA_LOCAL_DB": "로컬 DB를 통해 로그인",
+        "CONTINUE_AS_GUEST": "게스트로 계속하기"
     },
     "SIGN_UP": {
         "TITLE": "등록하기"

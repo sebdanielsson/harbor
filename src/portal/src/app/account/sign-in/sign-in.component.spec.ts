@@ -20,12 +20,18 @@ import { SkinableConfig } from '../../services/skinable-config.service';
 import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { throwError as observableThrowError } from 'rxjs/internal/observable/throwError';
-import { HttpErrorResponse } from '@angular/common/http';
+import {
+    HttpErrorResponse,
+    HttpHeaders,
+    HttpResponse,
+} from '@angular/common/http';
 import { UserPermissionService } from '../../shared/services';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { ProjectService } from '../../../../ng-swagger-gen/services/project.service';
 
 describe('SignInComponent', () => {
     let component: SignInComponent;
@@ -37,9 +43,24 @@ describe('SignInComponent', () => {
         getCurrentUser() {
             return {};
         },
+        setGuest(guest: boolean) {},
     };
     const mockedUserPermissionService = {
         clearPermissionCache() {},
+    };
+    // The number of public projects an anonymous user can see
+    let publicProjectCount: number;
+    const mockedProjectService = {
+        listProjectsResponse() {
+            return of(
+                new HttpResponse({
+                    headers: new HttpHeaders({
+                        'X-Total-Count': String(publicProjectCount),
+                    }),
+                    body: [],
+                })
+            );
+        },
     };
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -57,6 +78,7 @@ describe('SignInComponent', () => {
                     useValue: mockedUserPermissionService,
                 },
                 { provide: SessionService, useValue: mockedSessionService },
+                { provide: ProjectService, useValue: mockedProjectService },
                 {
                     provide: AppConfigService,
                     useValue: {
@@ -94,6 +116,7 @@ describe('SignInComponent', () => {
     });
 
     beforeEach(() => {
+        publicProjectCount = 1;
         fixture = TestBed.createComponent(SignInComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -101,6 +124,60 @@ describe('SignInComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should offer to continue as a guest when there are public projects', () => {
+        expect(
+            fixture.nativeElement.querySelector('#continue_as_guest')
+        ).toBeTruthy();
+    });
+
+    it('should not offer to continue as a guest without public projects', () => {
+        publicProjectCount = 0;
+        fixture = TestBed.createComponent(SignInComponent);
+        fixture.detectChanges();
+        expect(
+            fixture.nativeElement.querySelector('#continue_as_guest')
+        ).toBeFalsy();
+    });
+
+    it('should not offer to continue as a guest when the projects cannot be listed', () => {
+        spyOn(mockedProjectService, 'listProjectsResponse').and.returnValue(
+            observableThrowError(new HttpErrorResponse({ status: 500 }))
+        );
+        fixture = TestBed.createComponent(SignInComponent);
+        fixture.detectChanges();
+        expect(
+            fixture.nativeElement.querySelector('#continue_as_guest')
+        ).toBeFalsy();
+    });
+
+    it('should continue as a guest to the default page', () => {
+        const setGuest = spyOn(mockedSessionService, 'setGuest');
+        const clearCache = spyOn(
+            mockedUserPermissionService,
+            'clearPermissionCache'
+        );
+        const navigate = spyOn(
+            TestBed.inject(Router),
+            'navigateByUrl'
+        ).and.resolveTo(true);
+        fixture.nativeElement.querySelector('#continue_as_guest').click();
+        expect(clearCache).toHaveBeenCalled();
+        expect(setGuest).toHaveBeenCalledWith(true);
+        expect(navigate).toHaveBeenCalledWith('/harbor/projects');
+    });
+
+    it('should continue as a guest to the page that asked for sign-in', () => {
+        const navigate = spyOn(
+            TestBed.inject(Router),
+            'navigateByUrl'
+        ).and.resolveTo(true);
+        component.redirectUrl = '/harbor/projects/1/repositories';
+        component.continueAsGuest();
+        expect(navigate).toHaveBeenCalledWith(
+            '/harbor/projects/1/repositories'
+        );
     });
 
     it('should apply the theme color to the default login background', () => {

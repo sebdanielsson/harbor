@@ -10,7 +10,8 @@
         "INVALID_MSG": "Usuário ou senha inválidos",
         "CORE_SERVICE_NOT_AVAILABLE": "Serviço 'core' indisponível.",
         "OR": "OU",
-        "VIA_LOCAL_DB": "LOGIN COM BANCO DE DADOS LOCAL"
+        "VIA_LOCAL_DB": "LOGIN COM BANCO DE DADOS LOCAL",
+        "CONTINUE_AS_GUEST": "CONTINUAR COMO CONVIDADO"
     },
     "SIGN_UP": {
         "TITLE": "Cadastro de conta"

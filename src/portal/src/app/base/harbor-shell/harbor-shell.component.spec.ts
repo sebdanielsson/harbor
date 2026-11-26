@@ -41,6 +41,9 @@ const fakeSessionService = {
     getCurrentUser: function () {
         return { has_admin_role: true };
     },
+    isGuest: function () {
+        return false;
+    },
 };
 
 const fakeSearchTriggerService = {
@@ -163,6 +166,26 @@ describe('HarborShellComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should show a signed-in user the projects and logs', () => {
+        const nav: HTMLElement =
+            fixture.nativeElement.querySelector('clr-vertical-nav');
+        expect(nav.querySelector('a[href="/harbor/projects"]')).toBeTruthy();
+        expect(nav.querySelector('a[href="/harbor/logs"]')).toBeTruthy();
+    });
+
+    it('should show a guest the projects but not the logs', () => {
+        spyOn(fakeSessionService, 'getCurrentUser').and.returnValue(null);
+        spyOn(fakeSessionService, 'isGuest').and.returnValue(true);
+        fixture.detectChanges();
+        const nav: HTMLElement =
+            fixture.nativeElement.querySelector('clr-vertical-nav');
+        expect(nav.querySelector('a[href="/harbor/projects"]')).toBeTruthy();
+        expect(nav.querySelector('a[href="/harbor/logs"]')).toBeFalsy();
+        expect(
+            fixture.nativeElement.querySelector('hbr-operation-model')
+        ).toBeFalsy();
     });
 
     it('should open users profile', async () => {

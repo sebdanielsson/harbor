@@ -16,6 +16,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Project } from '../../../project';
 import { ArtifactListPageService } from './artifact-list-page.service';
 import { Subscription } from 'rxjs';
+import {
+    UserPermissionService,
+    USERSTATICPERMISSION,
+} from '../../../../../shared/services';
 
 @Component({
     selector: 'artifact-list-page',
@@ -31,10 +35,14 @@ export class ArtifactListPageComponent implements OnDestroy {
     depth: string;
     artifactDigest: string;
     routeParamsSub: Subscription;
+    // The Info tab reads the repository, which public projects don't let
+    // anyone but their members do.
+    hasRepositoryReadPermission: boolean = false;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private artifactListPageService: ArtifactListPageService
+        private artifactListPageService: ArtifactListPageService,
+        private userPermissionService: UserPermissionService
     ) {
         if (!this.routeParamsSub) {
             this.routeParamsSub = this.route.params.subscribe(params => {
@@ -66,6 +74,17 @@ export class ArtifactListPageComponent implements OnDestroy {
         }
         this.repoName = this.route.snapshot.params['repo'];
         this.artifactListPageService.init(+this.projectId);
+        this.userPermissionService
+            .getPermission(
+                this.projectId,
+                USERSTATICPERMISSION.REPOSITORY.KEY,
+                USERSTATICPERMISSION.REPOSITORY.VALUE.READ
+            )
+            .subscribe({
+                next: permission =>
+                    (this.hasRepositoryReadPermission = permission),
+                error: () => (this.hasRepositoryReadPermission = false),
+            });
     }
     watchGoBackEvt(projectId: string | number): void {
         this.router.navigate(['harbor', 'projects', projectId, 'repositories']);
